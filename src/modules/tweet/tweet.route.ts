@@ -1,12 +1,16 @@
 import { FastifyInstance } from 'fastify';
-import { createTweetHandler, getUserTweetsHandler } from './tweet.controller';
+import {
+  createTweetHandler,
+  getUserTimelineHandler,
+  getFeedsHandler,
+} from './tweet.controller';
 import { $ref } from './tweet.schema';
 
 async function tweetRoutes(server: FastifyInstance) {
   server.post(
     '/',
     {
-      preHandler: [server.authenticate],
+      // preHandler: [server.authenticate],
       schema: {
         body: $ref('createTweetSchema'),
         response: {
@@ -20,14 +24,26 @@ async function tweetRoutes(server: FastifyInstance) {
   server.get(
     '/',
     {
-      preHandler: [server.authenticate],
+      // preHandler: [server.authenticate],
       schema: {
         response: {
           '200': $ref('tweetsResponseSchema'),
         },
       },
     },
-    getUserTweetsHandler
+    getUserTimelineHandler
+  );
+  server.get(
+    '/feed',
+    {
+      //Since this is "public" feed there is no need for authentication
+      schema: {
+        response: {
+          '200': $ref('tweetsResponseSchema'),
+        },
+      },
+    },
+    getFeedsHandler
   );
 }
 

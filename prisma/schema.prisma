@@ -27,5 +27,6 @@ model Tweet {
   content   String   @db.VarChar(280) // Adjust the character limit as needed
   userId    Int
   user      User     @relation(fields: [userId], references: [id])
+  taggedUsers String[] // Array to store usernames of tagged users
   createdAt DateTime @default(now())
 }

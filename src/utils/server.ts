@@ -4,6 +4,8 @@ import { config } from './config';
 import fastifyJwt, { JWT } from '@fastify/jwt';
 import { userSchemas } from '../modules/user/user.schema';
 import userRoutes from '../modules/user/user.route';
+import tweetRoutes from '../modules/tweet/tweet.route';
+import { tweetSchemas } from '../modules/tweet/tweet.schema';
 
 declare module 'fastify' {
   interface FastifyRequest {
@@ -20,10 +22,11 @@ declare module '@fastify/jwt' {
       id: number;
       email: string;
       name: string;
+      username: string;
     };
   }
 }
-export async function buildServer() {
+function buildServer() {
   const app = fastify();
 
   app.register(fastifyJwt, {
@@ -50,23 +53,14 @@ export async function buildServer() {
     return next();
   });
 
-  for (const schema of userSchemas) {
+  for (const schema of [...userSchemas, ...tweetSchemas]) {
     app.addSchema(schema);
   }
 
   app.register(userRoutes, { prefix: 'api/users' });
+  app.register(tweetRoutes, { prefix: 'api/tweets' });
 
-  try {
-    await app.listen({
-      port: config.PORT,
-      host: config.HOST, //So that docker won't have issues
-    });
-
-    // Logging a message indicating that the server is listening
-    logger.info(`Server listening at port : ${config.PORT}`);
-  } catch (err) {
-    // Handling errors that may occur during server startup
-    logger.error('Error starting the server:', err);
-    process.exit(1);
-  }
+  return app;
 }
+
+export default buildServer;

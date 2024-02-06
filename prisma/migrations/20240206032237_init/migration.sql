@@ -17,6 +17,7 @@ CREATE TABLE "Tweet" (
     "id" SERIAL NOT NULL,
     "content" VARCHAR(280) NOT NULL,
     "userId" INTEGER NOT NULL,
+    "taggedUsers" TEXT[],
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT "Tweet_pkey" PRIMARY KEY ("id")

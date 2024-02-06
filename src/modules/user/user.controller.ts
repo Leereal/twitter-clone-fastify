@@ -1,5 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createUser, findUserByEmail, getUsers } from './user.service';
+import {
+  createUser,
+  findUserByEmail,
+  findUserByUsername,
+  getUsers,
+} from './user.service';
 import { CreateUserInput, LoginInput } from './user.schema';
 import { verifyPassword } from '../../utils/hash';
 
@@ -22,16 +27,23 @@ export async function loginHandler(
   request: FastifyRequest<{ Body: LoginInput }>,
   reply: FastifyReply
 ) {
-  const body = request.body;
-  const user = await findUserByEmail(body.email);
+  const { identifier, password } = request.body;
+
+  // Find user by email or username
+  const user =
+    (await findUserByEmail(identifier)) ||
+    (await findUserByUsername(identifier));
+
   if (!user) {
     return reply.code(401).send('Invalid email or password');
   }
+
   const correctPassword = verifyPassword({
-    candidatePassword: body.password,
+    candidatePassword: password,
     salt: user.salt,
     hash: user.password,
   });
+
   if (correctPassword) {
     const { password, ...rest } = user;
     const token = request.jwt.sign(rest);
@@ -39,7 +51,10 @@ export async function loginHandler(
       accessToken: token,
     };
   }
-  return reply.code(401).send('Invalid email or password');
+
+  return reply.code(401).send({
+    message: 'Invalid email or password',
+  });
 }
 
 export async function getUsersHandler() {

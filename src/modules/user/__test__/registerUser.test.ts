@@ -1,15 +1,15 @@
-import { faker } from "@faker-js/faker";
-import { test } from "tap";
-import buildServer from "../../../server";
-import { ImportMock } from "ts-mock-imports";
-import * as userService from "../user.service";
-import prisma from "../../../utils/prisma";
+import { faker } from '@faker-js/faker';
+import { test } from 'tap';
+import { ImportMock } from 'ts-mock-imports';
+import * as userService from '../user.service';
+import buildServer from '../../../utils/server';
 
 // Test case for successful user creation using mock `createUser` function
-test("POST `/api/users` - create user successfully with mock createUser", async (t) => {
+test('POST `/api/users/register` - create user successfully with mock createUser', async (t) => {
   // Generate fake user data
   const name = faker.person.fullName();
   const email = faker.internet.email();
+  const username = faker.internet.userName();
   const password = faker.internet.password();
   const id = Math.floor(Math.random() * 1_000);
 
@@ -17,9 +17,10 @@ test("POST `/api/users` - create user successfully with mock createUser", async 
   const fastify = buildServer();
 
   // Mock the `createUser` function with predefined data
-  const stub = ImportMock.mockFunction(userService, "createUser", {
+  const stub = ImportMock.mockFunction(userService, 'createUser', {
     name,
     email,
+    username,
     id,
   });
 
@@ -31,11 +32,12 @@ test("POST `/api/users` - create user successfully with mock createUser", async 
 
   // Make a POST request to create a user
   const response = await fastify.inject({
-    method: "POST",
-    url: "/api/users",
+    method: 'POST',
+    url: '/api/users/register',
     payload: {
       name,
       email,
+      username,
       password,
     },
   });
@@ -45,12 +47,13 @@ test("POST `/api/users` - create user successfully with mock createUser", async 
   t.equal(response.statusCode, 201);
 
   // Check if the content type header is correct
-  t.equal(response.headers["content-type"], "application/json; charset=utf-8");
+  t.equal(response.headers['content-type'], 'application/json; charset=utf-8');
 
   // Parse the response JSON and check if the data matches the expected values
   const json = response.json();
   t.equal(json.name, name);
   t.equal(json.email, email);
+  t.equal(json.username, username);
   t.equal(json.id, id);
 
   // Restore the mocked function
@@ -58,10 +61,11 @@ test("POST `/api/users` - create user successfully with mock createUser", async 
 });
 
 // Test case for successful user creation using a test database (empty for now)
-test("POST `/api/users` - create user successfully with test database", async (t) => {
+test('POST `/api/users/register` - create user successfully with test database', async (t) => {
   // Generate fake user data
   const name = faker.person.fullName();
   const email = faker.internet.email();
+  const username = faker.internet.userName();
   const password = faker.internet.password();
 
   // Build Fastify server instance
@@ -70,17 +74,16 @@ test("POST `/api/users` - create user successfully with test database", async (t
   // Teardown function to close the Fastify server and restore the mocked function
   t.teardown(async () => {
     fastify.close();
-    //When done delete all the users in our database
-    await prisma.user.deleteMany({});
   });
 
   // Make a POST request to create a user
   const response = await fastify.inject({
-    method: "POST",
-    url: "/api/users",
+    method: 'POST',
+    url: '/api/users/register',
     payload: {
       name,
       email,
+      username,
       password,
     },
   });
@@ -90,20 +93,22 @@ test("POST `/api/users` - create user successfully with test database", async (t
   t.equal(response.statusCode, 201);
 
   // Check if the content type header is correct
-  t.equal(response.headers["content-type"], "application/json; charset=utf-8");
+  t.equal(response.headers['content-type'], 'application/json; charset=utf-8');
 
   // Parse the response JSON and check if the data matches the expected values
   const json = response.json();
   t.equal(json.name, name);
   t.equal(json.email, email);
-  t.equal(json.id, "number");
+  t.equal(json.username, username);
+  t.type(json.id, 'number');
 });
 
 // Test case for failing to create a user (empty for now)
-test("POST `/api/users` - fail to create user", async (t) => {
+test('POST `/api/users/register` - fail to create user', async (t) => {
   // Generate fake user data
   const name = faker.person.fullName();
   const email = faker.internet.email();
+  const username = faker.internet.userName();
   const password = faker.internet.password();
 
   // Build Fastify server instance
@@ -112,17 +117,16 @@ test("POST `/api/users` - fail to create user", async (t) => {
   // Teardown function to close the Fastify server and restore the mocked function
   t.teardown(async () => {
     fastify.close();
-    //When done delete all the users in our database
-    await prisma.user.deleteMany({});
   });
 
   // Make a POST request to create a user
   const response = await fastify.inject({
     //Let's remove email to trigger the error
-    method: "POST",
-    url: "/api/users",
+    method: 'POST',
+    url: '/api/users/register',
     payload: {
       name,
+      username,
       password,
     },
   });
@@ -133,5 +137,7 @@ test("POST `/api/users` - fail to create user", async (t) => {
 
   // Parse the response JSON and check if the data matches the expected values
   const json = response.json();
-  t.equal(json.message, "body should have required property 'email'");
+  t.equal(json.message, "body must have required property 'email'");
 });
+
+//We can add more tests needed here

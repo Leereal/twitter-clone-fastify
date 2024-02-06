@@ -1,5 +1,10 @@
 import { FastifyReply, FastifyRequest } from 'fastify';
-import { createTweet, getTweetsByUserId } from './tweet.service';
+import {
+  createTweet,
+  getTimeline,
+  getTweetsByUserId,
+  getTweetsFeed,
+} from './tweet.service';
 import { CreateTweetInput } from './tweet.schema';
 
 export async function createTweetHandler(
@@ -17,12 +22,20 @@ export async function createTweetHandler(
   }
 }
 
-export async function getUserTweetsHandler(
+export async function getUserTimelineHandler(
   request: FastifyRequest,
   reply: FastifyReply
 ) {
   const userId = request.user.id; // Assuming you have user authentication middleware
+  const username = request.user.username;
+  const tweets = await getTimeline(userId, username);
+  return tweets;
+}
 
-  const tweets = await getTweetsByUserId(userId);
+export async function getFeedsHandler(
+  request: FastifyRequest,
+  reply: FastifyReply
+) {
+  const tweets = await getTweetsFeed();
   return tweets;
 }
