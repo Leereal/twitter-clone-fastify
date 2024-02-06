@@ -13,9 +13,19 @@ datasource db {
 model User {
   id        Int      @default(autoincrement()) @id
   name      String?
+  username  String   @unique
   email     String   @unique
   password  String
   salt      String
+  tweets    Tweet[] 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+}
+
+model Tweet {
+  id        Int      @default(autoincrement()) @id
+  content   String   @db.VarChar(280) // Adjust the character limit as needed
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
 }
