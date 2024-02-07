@@ -12,6 +12,8 @@
   "dependencies": {
     "@faker-js/faker": "^8.4.0",
     "@fastify/jwt": "^8.0.0",
+    "@fastify/swagger": "^8.14.0",
+    "@fastify/swagger-ui": "^2.1.0",
     "@prisma/client": "^5.9.1",
     "@sinclair/typebox": "^0.32.13",
     "env-schema": "^5.2.1",
