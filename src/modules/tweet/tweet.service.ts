@@ -6,6 +6,7 @@ export async function createTweet(userId: number, input: CreateTweetInput) {
   try {
     const { content } = input;
 
+    // Extract usernames tagged in the tweet content
     const taggedUsernames =
       content?.match(/@(\w+)/g)?.map((username) => username.slice(1)) || [];
 

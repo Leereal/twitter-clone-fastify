@@ -6,31 +6,42 @@ import {
 } from './user.controller';
 import { $ref } from './user.schema';
 
+// Define routes for user-related endpoints
 async function userRoutes(server: FastifyInstance) {
+  // Route for user registration
   server.post(
     '/register',
     {
       schema: {
-        body: $ref('createUserSchema'),
+        body: $ref('createUserSchema'), // Validate request body against createUserSchema
         response: {
-          '201': $ref('createUserResponseSchema'),
+          '201': $ref('createUserResponseSchema'), // Define response schema for successful registration
         },
       },
     },
-    registerUserHandler
+    registerUserHandler // Handler function for user registration
   );
+
+  // Route for user login
   server.post(
     '/login',
     {
       schema: {
-        body: $ref('loginSchema'),
+        body: $ref('loginSchema'), // Validate request body against loginSchema
         response: {
-          '200': $ref('loginResponseSchema'),
+          '200': $ref('loginResponseSchema'), // Define response schema for successful login
         },
       },
     },
-    loginHandler
+    loginHandler // Handler function for user login
   );
-  server.get('/', { preHandler: [server.authenticate] }, getUsersHandler);
+
+  // Route for retrieving user information
+  server.get(
+    '/',
+    { preHandler: [server.authenticate] }, // Authenticate user before processing the request
+    getUsersHandler // Handler function for retrieving user information
+  );
 }
+
 export default userRoutes;

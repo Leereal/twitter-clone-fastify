@@ -36,9 +36,10 @@ function buildServer() {
 
   // Register Swagger plugin to generate API documentation
   app.register(require('@fastify/swagger'), {
-    routePrefix: '/doc', // Define the route prefix for Swagger UI
+    routePrefix: '/docs', // Define the route prefix for Swagger UI
     exposeRoute: true, // Expose Swagger JSON schema
-    swagger: withRefResolver(swaggerConfig), // Use the swagger configuration
+    swagger: swaggerConfig, // Use the swagger configuration
+    staticCSP: true, // Enable static content security policy
   });
 
   // Register JWT plugin for authentication
