@@ -4,5 +4,6 @@ node_modules
 .tap
 .vscode
 package-lock.json
-
+prisma/migrations
+build
 
